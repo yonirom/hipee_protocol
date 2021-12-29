@@ -9,33 +9,37 @@ Unexplored:
 * OTA Upgrade (TI)
 
 
-BLE Connection
---------------
+## BLE Connection
 
-name "JZ-" or "jiaozi-"
+```name "JZ-" or "jiaozi-"```
 
-Relevant service UUID
----------------------
-0000FFF0-0000-1000-8000-00805F9B34FB
+## Relevant service UUID
+```0000FFF0-0000-1000-8000-00805F9B34FB```
 
-Relevant Charicreistic UUID
----------------------------
+## Relevant Charicreistic UUID
+```
 Notify - 0000fff1-0000-1000-8000-00805f9b34fb
 Write - 0000fff2-0000-1000-8000-00805f9b34fb
+```
 
-Command Format
---------------
+## Command Format
 
+All fields are little endian.
+
+```
 [0x09 , PARAMETER_LENGTH, CMDID,  PARAMETER_DATA, CHECKSUM]
+```
 
-Checksum Calculation
---------------------
+## Checksum Calculation
 
+Last byte must satisfy that the sum of all bytes in message % 256 == 0
+
+```
 ba += bytearray([256 - (sum(ba) % 256)])
+```
 
 
-Command Types
--------------
+## Command Types
 
 | CMDID | DIR  | DESCRIPTION
 | ----- | ---- | -----------
@@ -61,26 +65,23 @@ Command Types
 | 0x51  | R    | Extra Config Data (??)
 
 
-Command Details
----------------
+## Command Details
 
-* CMD ID: 0x01
-* Parameter Length: 0
+### CMD ID: 0x01
+Parameter Length: 0
 
-* CMD ID: 0x02
-* Parameter Length: 1
-* Parameters:
+### CMD ID: 0x02
+Parameter Length: 1
 
 | Byte | Length | Value |
 | ---- | ------ | ----- |
 | 00   | 1      |bool - was device confirmed by user
 
-CMD ID: 0x03
+### CMD ID: 0x03
 Parameter Length: 0
 
-CMD ID: 0x04
+### CMD ID: 0x04
 Parameter Length: 7
-Parameters:
 
 | Byte | Length | Value |
 | ---- | ------ | ----- |
@@ -89,28 +90,26 @@ Parameters:
 | 03   | 2      | Storage space remaining on device out of 1024
 
 
-CMD ID: 0x05
+### CMD ID: 0x05
 Parameter Length: 4
-Parameters:
 
 | Byte | Length | Value |
 | ---- | ------ | ----- |
-| 00   | 4      | The current time in seconds since the Epoch. hex(round(time.time()))
+| 00   | 4      | The current time in seconds since the Epoch. ```hex(round(time.time()))```
 
-CMD ID: 0x06
+
+### CMD ID: 0x06
 Parameter Length: 4
-Parameters:
 
 | Byte | Length | Value |
 | ---- | ------ | ----- |
 | 00   | 4      | The current time stored on the device in seconds since the Epoch
 
-CMD ID: 0x46
+### CMD ID: 0x46
 Parameter Length: 0
 
-CMD ID: 0x47
+### CMD ID: 0x47
 Parameter Length: 15
-Parameters:
 
 | Byte | Length | Value |
 | ---- | ------ | ----- |
@@ -130,18 +129,16 @@ Parameters:
 | 0e   | 1      | hardcoded 15
 
 
-CMD ID 0x34
+### CMD ID 0x34
 Parameter Length: 3
-Parameters:
 
 | Byte | Length | Value |
 | ---- | ------ | ----- |
 | 00   | 2      | time in milliseconds between each posture notification
 | 02   | 1      | bool - start/stop sending live updates
 
-CMD ID 0x35
+### CMD ID 0x35
 Parameter Length: 15
-Parameters:
 
 | Byte | Length | Value |
 | ---- | ------ | ----- |
