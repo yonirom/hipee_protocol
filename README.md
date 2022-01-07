@@ -24,7 +24,7 @@ Write - 0000fff2-0000-1000-8000-00805f9b34fb
 
 ## Command Format
 
-All fields are little endian.
+All communication is big endian.
 
 ```
 [0x09 , PARAMETER_LENGTH, CMDID,  PARAMETER_DATA, CHECKSUM]
@@ -67,11 +67,20 @@ ba += bytearray([256 - (sum(ba) % 256)])
 
 ## Command Details
 
+<<<<<<< Updated upstream
 ### CMD ID: 0x01
 Parameter Length: 0
 
 ### CMD ID: 0x02
 Parameter Length: 1
+=======
+CMD ID: 0x01
+Parameter Length: 0
+
+CMD ID: 0x02
+Parameter Length: 1
+Parameters:
+>>>>>>> Stashed changes
 
 | Byte | Length | Value |
 | ---- | ------ | ----- |
