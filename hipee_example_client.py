@@ -15,8 +15,8 @@ WRITE_CHARACTERISTIC_UUID = "0000FFF2-0000-1000-8000-00805F9B34FB"
 
 logger = logging.getLogger(__name__)
 
-class Parameter():
 
+class Parameter:
     def __init__(self, name, size, default_value):
         self.name = name
         self.size = size
@@ -27,7 +27,13 @@ class CommandMeta(type):
     def __new__(cls, name, bases, dct):
         x = super().__new__(cls, name, bases, dct)
         for parameter in x.parameters:
-            setattr(x, parameter.name, parameter.default_value() if callable(parameter.default_value) else parameter.default_value)
+            setattr(
+                x,
+                parameter.name,
+                parameter.default_value()
+                if callable(parameter.default_value)
+                else parameter.default_value,
+            )
         return x
 
 
@@ -51,7 +57,11 @@ class CommandBase(metaclass=CommandMeta):
         data.append(length)
         data.append(self.command_id)
         for parameter in self.parameters:
-            data.extend(getattr(self, parameter.name).to_bytes(length=parameter.size, byteorder="big"))
+            data.extend(
+                getattr(self, parameter.name).to_bytes(
+                    length=parameter.size, byteorder="big"
+                )
+            )
         data.append(self.hash(data))
         logger.debug(f"out: {self} {data.hex()}")
         return bytes(data)
@@ -85,29 +95,34 @@ class CommandBase(metaclass=CommandMeta):
         for attribute, value in zip((a.name for a in self.parameters), fields):
             self.__setattr__(attribute, value)
 
+
 class ErrorResponse(CommandBase):
-    command_id: int = 0xff
+    command_id: int = 0xFF
 
     parameters = [
-                    Parameter("unknown", 1, 0),
-                 ]
+        Parameter("unknown", 1, 0),
+    ]
+
 
 class HelloRequest(CommandBase):
     command_id: int = 0x01
 
     parameters: List[Parameter] = []
 
+
 class HelloResponse(CommandBase):
     command_id: int = 0x02
 
     parameters = [
-                    Parameter("accepted", 1, 0),
-                 ]
+        Parameter("accepted", 1, 0),
+    ]
+
 
 class InitialDataRequest(CommandBase):
     command_id: int = 0x03
 
     parameters: List[Parameter] = []
+
 
 class InitialDataResponse(CommandBase):
 
@@ -120,10 +135,10 @@ class InitialDataResponse(CommandBase):
         return f"V0.{self.version}"
 
     parameters = [
-                    Parameter("battery_percent", 1, 0),
-                    Parameter("version", 2, 0),
-                    Parameter("space_remaining", 4, 0)
-                 ]
+        Parameter("battery_percent", 1, 0),
+        Parameter("version", 2, 0),
+        Parameter("space_remaining", 4, 0),
+    ]
 
 
 class SetTimeRequest(CommandBase):
@@ -133,9 +148,8 @@ class SetTimeRequest(CommandBase):
     def current_time_str(self):
         return time.ctime(self.current_time)
 
-    parameters = [
-                    Parameter("current_time", 4, lambda: round(time.time()))
-                 ]
+    parameters = [Parameter("current_time", 4, lambda: round(time.time()))]
+
 
 class SetTimeResponse(CommandBase):
 
@@ -145,30 +159,29 @@ class SetTimeResponse(CommandBase):
     def device_time_str(self):
         return time.ctime(self.device_time)
 
-    parameters = [
-                    Parameter("device_time", 4, 0)
-                 ]
+    parameters = [Parameter("device_time", 4, 0)]
+
 
 class SetConfigDataRequest(CommandBase):
     command_id: int = 0x30
 
-
     parameters = [
-                    Parameter("shake_mode", 1, 1),
-                    Parameter("shake_power", 1, 50),   # Max power is 100 or deive will reboot
-                    Parameter("back_forward_angle_reminder", 1, 5),
-                    Parameter("back_sideways_angle_reminder", 1, 0),
-                    Parameter("unknown_hc_1", 1, 1),
-                    Parameter("unknown_hc_244", 1, 244),
-                    Parameter("unknown_hc_7", 1, 7),
-                    Parameter("unknown_hc_208", 1, 208),
-                    Parameter("sitting_time_seconds", 2, 0),
-                    Parameter("special_num", 1, 0),
-                    Parameter("shake_delay_reminder", 1, 2),
-                    Parameter("do_not_disturb", 1, 0),
-                    Parameter("exercise_angle_reminder", 1, 30),
-                    Parameter("unknown_hc_15", 1, 0)
-                ]
+        Parameter("shake_mode", 1, 1),
+        Parameter("shake_power", 1, 50),  # Max power is 100 or deive will reboot
+        Parameter("back_forward_angle_reminder", 1, 5),
+        Parameter("back_sideways_angle_reminder", 1, 0),
+        Parameter("unknown_hc_1", 1, 1),
+        Parameter("unknown_hc_244", 1, 244),
+        Parameter("unknown_hc_7", 1, 7),
+        Parameter("unknown_hc_208", 1, 208),
+        Parameter("sitting_time_seconds", 2, 0),
+        Parameter("special_num", 1, 0),
+        Parameter("shake_delay_reminder", 1, 2),
+        Parameter("do_not_disturb", 1, 0),
+        Parameter("exercise_angle_reminder", 1, 30),
+        Parameter("unknown_hc_15", 1, 0),
+    ]
+
 
 class SetConfigDataResponse(CommandBase):
     command_id: int = 0x31
@@ -177,110 +190,117 @@ class SetConfigDataResponse(CommandBase):
         return time.ctime(self.device_time)
 
     parameters = [
-                    Parameter("device_time", 4, 0),
-                 ]
+        Parameter("device_time", 4, 0),
+    ]
+
 
 class SetStandardRequest(CommandBase):
     command_id: int = 0x32
 
     parameters: List[Parameter] = []
 
+
 class SetStandardResponse(CommandBase):
     command_id: int = 0x33
 
     parameters = [
-                    Parameter("left_right_angle", 1, 0),
-                    Parameter("front_back_angle_90_deg_offset", 1, 0),
-                    Parameter("from_back_angle", 1, 0)
-                 ]
+        Parameter("left_right_angle", 1, 0),
+        Parameter("front_back_angle_90_deg_offset", 1, 0),
+        Parameter("from_back_angle", 1, 0),
+    ]
+
 
 class GetLiveUpdateRequest(CommandBase):
     command_id: int = 0x34
 
     parameters = [
-                    Parameter("delay_milliseconds", 2, 20),
-                    Parameter("enable_stream", 1, 1)
-                 ]
+        Parameter("delay_milliseconds", 2, 20),
+        Parameter("enable_stream", 1, 1),
+    ]
+
 
 class LiveUpdateResponse(CommandBase):
 
     command_id: int = 0x35
 
     parameters = [
-                    Parameter("current_time", 4, 0),
-                    Parameter("back_forward_angle", 1, 0),
-                    Parameter("back_left_right_angle", 1, 0),
-                    Parameter("error_num", 2, 0),
-                    Parameter("long_sit_ready", 2, 0),
-                    Parameter("mode", 1, 0),
-                    Parameter("do_not_disturb", 1, 0),
-                    Parameter("challenge_progress", 4, 0)
-                 ]
+        Parameter("current_time", 4, 0),
+        Parameter("back_forward_angle", 1, 0),
+        Parameter("back_left_right_angle", 1, 0),
+        Parameter("error_num", 2, 0),
+        Parameter("long_sit_ready", 2, 0),
+        Parameter("mode", 1, 0),
+        Parameter("do_not_disturb", 1, 0),
+        Parameter("challenge_progress", 4, 0),
+    ]
+
 
 class GetBatteryStateRequest(CommandBase):
     command_id: int = 0x44
 
     parameters: List[Parameter] = []
 
+
 class GetBatteryStateResponse(CommandBase):
     command_id: int = 0x45
 
-    charge_state:int = 0  # 0 Charging, 1 Full, 2 In Use
+    charge_state: int = 0  # 0 Charging, 1 Full, 2 In Use
 
     def charge_state_str(self):
         return ["Charging", "Full", "Discharging"][self.charge_state]
 
-    parameters = [
-                    Parameter("battery_percent", 1, 0),
-                    Parameter("charge_state", 1, 0)
-                 ]
+    parameters = [Parameter("battery_percent", 1, 0), Parameter("charge_state", 1, 0)]
+
 
 class GetConfigDataRequest(CommandBase):
     command_id: int = 0x46
 
     parameters: List[Parameter] = []
 
+
 class GetConfigDataResponse(CommandBase):
     command_id: int = 0x47
 
     parameters = [
-                    Parameter("shake_mode", 1, 0),
-                    Parameter("shake_power", 1, 0),
-                    Parameter("back_forward_angle_reminder", 1, 0),
-                    Parameter("back_sideways_angle_reminder", 1, 0),
-                    Parameter("unknown_hc_1", 1, 0),
-                    Parameter("unknown_hc_244", 1, 0),
-                    Parameter("unknown_hc_7", 1, 0),
-                    Parameter("unknown_hc_208", 1, 0),
-                    Parameter("sitting_time_seconds", 2, 0),
-                    Parameter("special_num", 1, 0),
-                    Parameter("shake_delay_reminder", 1, 0),
-                    Parameter("do_not_disturb", 1, 0),
-                    Parameter("exercise_angle_reminder", 1, 0),
-                    Parameter("unknown_hc_15", 1, 0)
-                 ]
+        Parameter("shake_mode", 1, 0),
+        Parameter("shake_power", 1, 0),
+        Parameter("back_forward_angle_reminder", 1, 0),
+        Parameter("back_sideways_angle_reminder", 1, 0),
+        Parameter("unknown_hc_1", 1, 0),
+        Parameter("unknown_hc_244", 1, 0),
+        Parameter("unknown_hc_7", 1, 0),
+        Parameter("unknown_hc_208", 1, 0),
+        Parameter("sitting_time_seconds", 2, 0),
+        Parameter("special_num", 1, 0),
+        Parameter("shake_delay_reminder", 1, 0),
+        Parameter("do_not_disturb", 1, 0),
+        Parameter("exercise_angle_reminder", 1, 0),
+        Parameter("unknown_hc_15", 1, 0),
+    ]
+
 
 class SetExtConfigDataRequest(CommandBase):
     command_id: int = 0x50
 
     parameters = [
-                    Parameter("allow_double_tap", 1, 0),
-                    Parameter("unknown_hc_0", 1, 0),
-                    Parameter("auto_restore_double_tap_time_minutes", 2, 0),
-                    Parameter("unknown_hc_1", 1, 1)
-                 ]
+        Parameter("allow_double_tap", 1, 0),
+        Parameter("unknown_hc_0", 1, 0),
+        Parameter("auto_restore_double_tap_time_minutes", 2, 0),
+        Parameter("unknown_hc_1", 1, 1),
+    ]
 
 
 class SetExtConfigDataResponse(CommandBase):
     command_id: int = 0x51
 
     parameters = [
-                    Parameter("unknown1", 1, 1),
-                    Parameter("unknown2", 1, 0),
-                    Parameter("unknown3", 1, 0),
-                    Parameter("unknown4", 1, 0),
-                    Parameter("unknown5", 1, 0)
-                 ]
+        Parameter("unknown1", 1, 1),
+        Parameter("unknown2", 1, 0),
+        Parameter("unknown3", 1, 0),
+        Parameter("unknown4", 1, 0),
+        Parameter("unknown5", 1, 0),
+    ]
+
 
 def parseCommand(data) -> Optional[CommandBase]:
     commands = {
@@ -302,7 +322,7 @@ def parseCommand(data) -> Optional[CommandBase]:
         0x47: GetConfigDataResponse,
         0x50: SetExtConfigDataRequest,
         0x51: SetExtConfigDataResponse,
-        0xff: ErrorResponse,
+        0xFF: ErrorResponse,
     }
 
     if data[2] not in commands:
@@ -329,19 +349,31 @@ async def start(address):
 
         await client.write_gatt_char(WRITE_CHARACTERISTIC_UUID, bytes(HelloRequest()))
         await asyncio.sleep(3)
-        await client.write_gatt_char(WRITE_CHARACTERISTIC_UUID, bytes(InitialDataRequest()))
+        await client.write_gatt_char(
+            WRITE_CHARACTERISTIC_UUID, bytes(InitialDataRequest())
+        )
         await asyncio.sleep(3.0)
         await client.write_gatt_char(WRITE_CHARACTERISTIC_UUID, bytes(SetTimeRequest()))
         await asyncio.sleep(3.0)
-        await client.write_gatt_char(WRITE_CHARACTERISTIC_UUID, bytes(SetConfigDataRequest()))
+        await client.write_gatt_char(
+            WRITE_CHARACTERISTIC_UUID, bytes(SetConfigDataRequest())
+        )
         await asyncio.sleep(3.0)
-        await client.write_gatt_char(WRITE_CHARACTERISTIC_UUID, bytes(GetBatteryStateRequest()))
+        await client.write_gatt_char(
+            WRITE_CHARACTERISTIC_UUID, bytes(GetBatteryStateRequest())
+        )
         await asyncio.sleep(3.0)
-        await client.write_gatt_char(WRITE_CHARACTERISTIC_UUID, bytes(GetConfigDataRequest()))
+        await client.write_gatt_char(
+            WRITE_CHARACTERISTIC_UUID, bytes(GetConfigDataRequest())
+        )
         await asyncio.sleep(3.0)
-        await client.write_gatt_char(WRITE_CHARACTERISTIC_UUID, bytes(SetStandardRequest()))
+        await client.write_gatt_char(
+            WRITE_CHARACTERISTIC_UUID, bytes(SetStandardRequest())
+        )
         await asyncio.sleep(10.0)
-        await client.write_gatt_char(WRITE_CHARACTERISTIC_UUID, bytes(GetLiveUpdateRequest()))
+        await client.write_gatt_char(
+            WRITE_CHARACTERISTIC_UUID, bytes(GetLiveUpdateRequest())
+        )
 
         await asyncio.sleep(150.0)
         await client.stop_notify(char_uuid)
@@ -356,14 +388,30 @@ async def scan():
 if __name__ == "__main__":
     logger.setLevel(logging.INFO)
     ch = logging.StreamHandler()
-    ch.setFormatter(logging.Formatter('%(asctime)s  %(message)s'))
+    ch.setFormatter(logging.Formatter("%(asctime)s  %(message)s"))
     logger.addHandler(ch)
 
-    parser = argparse.ArgumentParser(description='Hippe BLE API Example',
-                                     epilog='*Make sure hipee is not connected to phone app')
-    parser.add_argument('mac', metavar='UUID or MAC', nargs='?', type=str, help='Hipee Bluetooth UUID/MAC')
-    parser.add_argument('--scan', dest='scan', action='store_const', const=True, help='scan BLE devices')
-    parser.add_argument('--debug', dest='debug', action='store_const', const=True, help='scan BLE devices')
+    parser = argparse.ArgumentParser(
+        description="Hippe BLE API Example",
+        epilog="*Make sure hipee is not connected to phone app",
+    )
+    parser.add_argument(
+        "mac",
+        metavar="UUID or MAC",
+        nargs="?",
+        type=str,
+        help="Hipee Bluetooth UUID/MAC",
+    )
+    parser.add_argument(
+        "--scan", dest="scan", action="store_const", const=True, help="scan BLE devices"
+    )
+    parser.add_argument(
+        "--debug",
+        dest="debug",
+        action="store_const",
+        const=True,
+        help="scan BLE devices",
+    )
 
     args = parser.parse_args()
 
