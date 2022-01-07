@@ -11,10 +11,14 @@ Unexplored:
 
 ## BLE Connection
 
-```name "JZ-" or "jiaozi-"```
+```
+name "JZ-" or "jiaozi-"
+```
 
 ## Relevant service UUID
-```0000FFF0-0000-1000-8000-00805F9B34FB```
+```
+0000FFF0-0000-1000-8000-00805F9B34FB
+```
 
 ## Relevant Charicreistic UUID
 ```
@@ -49,10 +53,6 @@ ba += bytearray([256 - (sum(ba) % 256)])
 | 0x04  | R    | Reply with Power Level, Remaining Space, version
 | 0x05  | W    | Set the device time
 | 0x06  | R    | Returns the newly set time
-| 0x46  | W    | Get Device Configuration
-| 0x47  | R    | Returns the device configuration
-| 0x50  | W    | Write Additional (?) config information TBD
-| 0x51  | R    | Read additional config information
 | 0x30  | W    | Set Device Configuration
 | 0x31  | R    | return Device Configuration
 | 0x32  | W    | Reset current position to zero
@@ -61,30 +61,24 @@ ba += bytearray([256 - (sum(ba) % 256)])
 | 0x35  | R    | Live position information
 | 0x44  | W    | Request battery charge state/status
 | 0x45  | R    | Respond with battery charge state/status
-| 0x50  | W    | Extra Config Data (??)
-| 0x51  | R    | Extra Config Data (??)
+| 0x46  | W    | Get Device Configuration
+| 0x47  | R    | Returns the device configuration
+| 0x50  | W    | Set button double tap options
+| 0x51  | R    | Reply to set double tap options, unknown
+| 0xff  | R    | Error response
 
 
 ## Command Details
 
-<<<<<<< Updated upstream
 ### CMD ID: 0x01
 Parameter Length: 0
 
 ### CMD ID: 0x02
 Parameter Length: 1
-=======
-CMD ID: 0x01
-Parameter Length: 0
-
-CMD ID: 0x02
-Parameter Length: 1
-Parameters:
->>>>>>> Stashed changes
 
 | Byte | Length | Value |
 | ---- | ------ | ----- |
-| 00   | 1      |bool - was device confirmed by user
+| 00   | 1      | Bool - was device confirmed by user
 
 ### CMD ID: 0x03
 Parameter Length: 0
@@ -114,6 +108,78 @@ Parameter Length: 4
 | ---- | ------ | ----- |
 | 00   | 4      | The current time stored on the device in seconds since the Epoch
 
+### CMD ID: 0x30
+Parameter Length: 14
+
+| Byte | Length | Value |
+| ---- | ------ | ----- |
+| 00   | 1      | Shake mode (0=Long, 1=Short)
+| 01   | 1      | Shake power < 100 (over 100 will cause device reboot)
+| 02   | 1      | Shake reminder for forward back angle in degrees
+| 03   | 1      | Shake reminder for sideways back angle in degrees (does not trigger shake)
+| 04   | 1      | Unknown - constant value 1
+| 05   | 1      | Unknown - constant value 244
+| 06   | 1      | Unknown - constant value 7
+| 07   | 1      | Unknown - constant value 208
+| 08   | 1      | Sitting time in seconds for log sit reminder
+| 09   | 1      | Special number (unknown)
+| 0A   | 1      | Shake delay reminder in seconds
+| 0B   | 1      | Do not disturb (suppress shakes)
+| 0C   | 1      | Exercise angle reminder
+| 0D   | 1      | Unknown - constant value 15
+
+### CMD ID: 0x31
+Parameter Length: 4
+
+| Byte | Length | Value |
+| ---- | ------ | ----- |
+| 00   | 4      | Device time
+
+### CMD ID: 0x32
+Parameter Length: 0
+
+### CMD ID: 0x33
+Parameter Length: 3
+
+| Byte | Length | Value |
+| ---- | ------ | ----- |
+| 00   | 1      | Left right angle
+| 01   | 1      | Front back angle with a 90 degree offset (?)
+| 02   | 1      | Front back angle
+
+### CMD ID 0x34
+Parameter Length: 3
+
+| Byte | Length | Value |
+| ---- | ------ | ----- |
+| 00   | 2      | Time in milliseconds between each posture notification
+| 02   | 1      | Bool - start/stop sending live updates
+
+### CMD ID 0x35
+Parameter Length: 16
+
+| Byte | Length | Value |
+| ---- | ------ | ----- |
+| 00   | 4      | Current time
+| 04   | 1      | Back forward angle
+| 05   | 1      | Back left right angle
+| 06   | 2      | Number of shake alerts
+| 08   | 2      | Long sit counter (?)
+| 0A   | 1      | Mode (?)
+| 0B   | 1      | Do not disturb
+| 0C   | 4      | Daily challenge progress
+
+### CMD ID 0x44
+Parameter Length: 0
+
+### CMD ID 0x45
+Parameter Length: 2
+
+| Byte | Length | Value |
+| ---- | ------ | ----- |
+| 00   | 1      | Battery level in percent
+| 01   | 1      | Charge state in (0=Charging, 1=Full, 2=Discharging)
+
 ### CMD ID: 0x46
 Parameter Length: 0
 
@@ -122,46 +188,38 @@ Parameter Length: 15
 
 | Byte | Length | Value |
 | ---- | ------ | ----- |
-| 00   | 1      | Shakemode - 0x1 short, 0x0 long
-| 01   | 1      | Shake Power
-| 02   | 1      | back forward angle 0 upto 90
-| 03   | 1      | back sideways angle -90 upto 90 (??)
-| 04   | 1      | hardcoded 1
-| 05   | 1      | hardcoded 244
-| 06   | 1      | hardcoded 7
-| 07   | 1      | hardcoded 208
-| 08   | 2      | Sitting time in seconds
-| 0a   | 1      | special num (??)
-| 0b   | 1      | delay reminder before shake
-| 0c   | 1      | Do not disturb
-| 0d   | 1      | workforerake (??)
-| 0e   | 1      | hardcoded 15
+| 00   | 1      | Shake mode (0=Long, 1=Short)
+| 01   | 1      | Shake power < 100 (over 100 will cause device reboot)
+| 02   | 1      | Shake reminder for forward back angle in degrees (0-90)
+| 03   | 1      | Shake reminder for sideways back angle in degrees (does not trigger shake)
+| 04   | 1      | unknown - constant value 1
+| 05   | 1      | Unknown - constant value 244
+| 06   | 1      | Unknown - constant value 7
+| 07   | 1      | Unknown - constant value 208
+| 08   | 1      | Sitting time in seconds for log sit reminder
+| 09   | 1      | Special number (unknown)
+| 0A   | 1      | Shake delay reminder in seconds
+| 0B   | 1      | Do not disturb (suppress shakes)
+| 0C   | 1      | Exercise angle reminder
+| 0D   | 1      | Unknown - constant value 15
 
-
-### CMD ID 0x34
-Parameter Length: 3
-
-| Byte | Length | Value |
-| ---- | ------ | ----- |
-| 00   | 2      | time in milliseconds between each posture notification
-| 02   | 1      | bool - start/stop sending live updates
-
-### CMD ID 0x35
-Parameter Length: 15
+### CMD ID: 0x50
+Parameter Length: 4
 
 | Byte | Length | Value |
 | ---- | ------ | ----- |
-| 00   | 1      | Shakemode - 0x1 short, 0x0 long
-| 01   | 1      | Shake Power
-| 02   | 1      | back forward angle 0 upto 90
-| 03   | 1      | back sideways angle -90 upto 90 (??)
-| 04   | 1      | hardcoded 1
-| 05   | 1      | hardcoded 244
-| 06   | 1      | hardcoded 7
-| 07   | 1      | hardcoded 208
-| 08   | 2      | Sitting time in seconds
-| 0a   | 1      | special num (??)
-| 0b   | 1      | delay reminder before shake
-| 0c   | 1      | Do not disturb
-| 0d   | 1      | workforerake (??)
-| 0e   | 1      | hardcoded 15
+| 00   | 1      | Enable / Disable do not disturb double tap
+| 01   | 1      | unknown - constant value  0
+| 02   | 1      | Minutes after disabling double tap to reenable shake alerts
+| 03   | 1      | unknown - constant value  1
+
+### CMD ID: 0x51
+Parameter Length: 5
+
+| Byte | Length | Value |
+| ---- | ------ | ----- |
+| 00   | 1      | Unknown (?)
+| 01   | 1      | Unknown (?)
+| 02   | 1      | Unknwon (?)
+| 03   | 1      | Unknwon (?)
+| 04   | 1      | Unknwon (?)

@@ -5,6 +5,8 @@ verify_ssl = true
 
 [dev-packages]
 ipython = "*"
+mypy = "*"
+black = "==21.12b0"
 
 [packages]
 bleak = "*"

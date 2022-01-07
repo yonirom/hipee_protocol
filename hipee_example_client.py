@@ -4,7 +4,7 @@ import struct
 import time
 import argparse
 import logging
-from typing import Dict, Tuple
+from typing import Dict, Tuple, List, Optional
 from dataclasses import dataclass
 from collections import OrderedDict
 
@@ -35,7 +35,7 @@ class CommandBase(metaclass=CommandMeta):
 
     magic: int = 0x09
 
-    parameters = ()
+    parameters: List[Parameter] = []
 
     def __init__(self, data=None):
         if data:
@@ -88,22 +88,26 @@ class CommandBase(metaclass=CommandMeta):
 class ErrorResponse(CommandBase):
     command_id: int = 0xff
 
-    parameters = (Parameter("unknown", 1, 0),)
+    parameters = [
+                    Parameter("unknown", 1, 0),
+                 ]
 
 class HelloRequest(CommandBase):
     command_id: int = 0x01
 
-    parameters = ()
+    parameters: List[Parameter] = []
 
 class HelloResponse(CommandBase):
     command_id: int = 0x02
 
-    parameters = (Parameter("accepted", 1, 0),)
+    parameters = [
+                    Parameter("accepted", 1, 0),
+                 ]
 
 class InitialDataRequest(CommandBase):
     command_id: int = 0x03
 
-    parameters = ()
+    parameters: List[Parameter] = []
 
 class InitialDataResponse(CommandBase):
 
@@ -115,10 +119,11 @@ class InitialDataResponse(CommandBase):
     def version_str(self):
         return f"V0.{self.version}"
 
-    parameters: Tuple[Parameter] = (Parameter("battery_percent", 1, 0),
-                                    Parameter("version", 2, 0),
-                                    Parameter("space_remaining", 4, 0)
-                                   )
+    parameters = [
+                    Parameter("battery_percent", 1, 0),
+                    Parameter("version", 2, 0),
+                    Parameter("space_remaining", 4, 0)
+                 ]
 
 
 class SetTimeRequest(CommandBase):
@@ -128,7 +133,9 @@ class SetTimeRequest(CommandBase):
     def current_time_str(self):
         return time.ctime(self.current_time)
 
-    parameters: Tuple[Parameter] = (Parameter("current_time", 4, lambda: round(time.time())),)
+    parameters = [
+                    Parameter("current_time", 4, lambda: round(time.time()))
+                 ]
 
 class SetTimeResponse(CommandBase):
 
@@ -138,84 +145,30 @@ class SetTimeResponse(CommandBase):
     def device_time_str(self):
         return time.ctime(self.device_time)
 
-    parameters: Tuple[Parameter] = (Parameter("device_time", 4, 0),)
-
-class SetStandardRequest(CommandBase):
-    command_id: int = 0x32
-
-    parameters = ()
-
-class SetStandardResponse(CommandBase):
-    command_id: int = 0x33
-
-    parameters = (Parameter("left_right_angle", 1, 0),
-                  Parameter("front_back_angle_90_deg_offset", 1, 0),
-                  Parameter("from_back_angle", 1, 0)
-                 )
-
-class GetLiveUpdateRequest(CommandBase):
-    command_id: int = 0x34
-
-    parameters = (Parameter("delay_milliseconds", 2, 20),
-                  Parameter("enable_stream", 1, 1))
-
-class LiveUpdateResponse(CommandBase):
-
-    command_id: int = 0x35
-
-    parameters: Tuple[Tuple[str, int]] = (Parameter("current_time", 4, 0),
-                                          Parameter("back_forward_angle", 1, 0),
-                                          Parameter("back_left_right_angle", 1, 0),
-                                          Parameter("error_num", 2, 0),
-                                          Parameter("long_sit_ready", 2, 0),
-                                          Parameter("mode", 1, 0),
-                                          Parameter("do_not_disturb", 1, 0),
-                                          Parameter("challenge_progress", 4, 0)
-                                          )
-
-class GetConfigDataRequest(CommandBase):
-    command_id: int = 0x46
-
-    parameters = ()
-
-class GetConfigDataResponse(CommandBase):
-    command_id: int = 0x47
-
-    parameters = (Parameter("shake_mode", 1, 0),
-                  Parameter("shake_power", 1, 0),
-                  Parameter("back_forward_angle_reminder", 1, 0),
-                  Parameter("back_sideways_angle_reminder", 1, 0),
-                  Parameter("unknown_hc_1", 1, 0),
-                  Parameter("unknown_hc_244", 1, 0),
-                  Parameter("unknown_hc_7", 1, 0),
-                  Parameter("unknown_hc_208", 1, 0),
-                  Parameter("sitting_time_seconds", 2, 0),
-                  Parameter("special_num", 1, 0),
-                  Parameter("shake_delay_reminder", 1, 0),
-                  Parameter("do_not_disturb", 1, 0),
-                  Parameter("exercise_angle_reminder", 1, 0),
-                  Parameter("unknown_hc_15", 1, 0)
-                  )
+    parameters = [
+                    Parameter("device_time", 4, 0)
+                 ]
 
 class SetConfigDataRequest(CommandBase):
     command_id: int = 0x30
 
 
-    parameters = (Parameter("shake_mode", 1, 1),
-                  Parameter("shake_power", 1, 50),   # Max power is 100 or deive will reboot
-                  Parameter("back_forward_angle_reminder", 1, 5),
-                  Parameter("back_sideways_angle_reminder", 1, 0),
-                  Parameter("unknown_hc_1", 1, 1),
-                  Parameter("unknown_hc_244", 1, 244),
-                  Parameter("unknown_hc_7", 1, 7),
-                  Parameter("unknown_hc_208", 1, 208),
-                  Parameter("sitting_time_seconds", 2, 0),
-                  Parameter("special_num", 1, 0),
-                  Parameter("shake_delay_reminder", 1, 2),
-                  Parameter("do_not_disturb", 1, 0),
-                  Parameter("exercise_angle_reminder", 1, 30),
-                  Parameter("unknown_hc_15", 1, 0)
-                  )
+    parameters = [
+                    Parameter("shake_mode", 1, 1),
+                    Parameter("shake_power", 1, 50),   # Max power is 100 or deive will reboot
+                    Parameter("back_forward_angle_reminder", 1, 5),
+                    Parameter("back_sideways_angle_reminder", 1, 0),
+                    Parameter("unknown_hc_1", 1, 1),
+                    Parameter("unknown_hc_244", 1, 244),
+                    Parameter("unknown_hc_7", 1, 7),
+                    Parameter("unknown_hc_208", 1, 208),
+                    Parameter("sitting_time_seconds", 2, 0),
+                    Parameter("special_num", 1, 0),
+                    Parameter("shake_delay_reminder", 1, 2),
+                    Parameter("do_not_disturb", 1, 0),
+                    Parameter("exercise_angle_reminder", 1, 30),
+                    Parameter("unknown_hc_15", 1, 0)
+                ]
 
 class SetConfigDataResponse(CommandBase):
     command_id: int = 0x31
@@ -223,33 +176,51 @@ class SetConfigDataResponse(CommandBase):
     def device_time_str(self):
         return time.ctime(self.device_time)
 
-    parameters = (Parameter("device_time", 4, 0),
-                 )
+    parameters = [
+                    Parameter("device_time", 4, 0),
+                 ]
 
-class SetExtConfigDataRequest(CommandBase):
-    command_id: int = 0x50
+class SetStandardRequest(CommandBase):
+    command_id: int = 0x32
 
-    parameters = (Parameter("allow_double_tap", 1, 0),
-                  Parameter("unknown_hc_0", 1, 0),
-                  Parameter("auto_restore_double_tap_time_minutes", 2, 0),
-                  Parameter("unknown_hc_1", 1, 0)
-                 )
+    parameters: List[Parameter] = []
 
+class SetStandardResponse(CommandBase):
+    command_id: int = 0x33
 
-class SetExtConfigDataResponse(CommandBase):
-    command_id: int = 0x51
+    parameters = [
+                    Parameter("left_right_angle", 1, 0),
+                    Parameter("front_back_angle_90_deg_offset", 1, 0),
+                    Parameter("from_back_angle", 1, 0)
+                 ]
 
-    parameters = (Parameter("unknown1", 1, 1),
-                  Parameter("unknown2", 1, 0),
-                  Parameter("unknown3", 1, 0),
-                  Parameter("unknown4", 1, 0),
-                  Parameter("unknown5", 1, 0)
-                 )
+class GetLiveUpdateRequest(CommandBase):
+    command_id: int = 0x34
+
+    parameters = [
+                    Parameter("delay_milliseconds", 2, 20),
+                    Parameter("enable_stream", 1, 1)
+                 ]
+
+class LiveUpdateResponse(CommandBase):
+
+    command_id: int = 0x35
+
+    parameters = [
+                    Parameter("current_time", 4, 0),
+                    Parameter("back_forward_angle", 1, 0),
+                    Parameter("back_left_right_angle", 1, 0),
+                    Parameter("error_num", 2, 0),
+                    Parameter("long_sit_ready", 2, 0),
+                    Parameter("mode", 1, 0),
+                    Parameter("do_not_disturb", 1, 0),
+                    Parameter("challenge_progress", 4, 0)
+                 ]
 
 class GetBatteryStateRequest(CommandBase):
     command_id: int = 0x44
 
-    parameters = ()
+    parameters: List[Parameter] = []
 
 class GetBatteryStateResponse(CommandBase):
     command_id: int = 0x45
@@ -259,30 +230,79 @@ class GetBatteryStateResponse(CommandBase):
     def charge_state_str(self):
         return ["Charging", "Full", "Discharging"][self.charge_state]
 
-    parameters = (Parameter("battery_percent", 1, 0),
-                  Parameter("charge_state", 1, 0)
-                 )
+    parameters = [
+                    Parameter("battery_percent", 1, 0),
+                    Parameter("charge_state", 1, 0)
+                 ]
 
-def parseCommand(data) -> CommandBase:
-    commands = { 0x1: HelloRequest,
-      0x2: HelloResponse,
-      0x3: InitialDataRequest,
-      0x4: InitialDataResponse,
-      0x5: SetTimeRequest,
-      0x6: SetTimeResponse,
-      0x30: SetConfigDataRequest,
-      0x31: SetConfigDataResponse,
-      0x32: SetStandardRequest,
-      0x33: SetStandardResponse,
-      0x34: GetLiveUpdateRequest,
-      0x35: LiveUpdateResponse,
-      0x44: GetBatteryStateRequest,
-      0x45: GetBatteryStateResponse,
-      0x46: GetConfigDataRequest,
-      0x47: GetConfigDataResponse,
-      0x50: SetExtConfigDataRequest,
-      0x51: SetExtConfigDataResponse,
-      0xff: ErrorResponse,
+class GetConfigDataRequest(CommandBase):
+    command_id: int = 0x46
+
+    parameters: List[Parameter] = []
+
+class GetConfigDataResponse(CommandBase):
+    command_id: int = 0x47
+
+    parameters = [
+                    Parameter("shake_mode", 1, 0),
+                    Parameter("shake_power", 1, 0),
+                    Parameter("back_forward_angle_reminder", 1, 0),
+                    Parameter("back_sideways_angle_reminder", 1, 0),
+                    Parameter("unknown_hc_1", 1, 0),
+                    Parameter("unknown_hc_244", 1, 0),
+                    Parameter("unknown_hc_7", 1, 0),
+                    Parameter("unknown_hc_208", 1, 0),
+                    Parameter("sitting_time_seconds", 2, 0),
+                    Parameter("special_num", 1, 0),
+                    Parameter("shake_delay_reminder", 1, 0),
+                    Parameter("do_not_disturb", 1, 0),
+                    Parameter("exercise_angle_reminder", 1, 0),
+                    Parameter("unknown_hc_15", 1, 0)
+                 ]
+
+class SetExtConfigDataRequest(CommandBase):
+    command_id: int = 0x50
+
+    parameters = [
+                    Parameter("allow_double_tap", 1, 0),
+                    Parameter("unknown_hc_0", 1, 0),
+                    Parameter("auto_restore_double_tap_time_minutes", 2, 0),
+                    Parameter("unknown_hc_1", 1, 1)
+                 ]
+
+
+class SetExtConfigDataResponse(CommandBase):
+    command_id: int = 0x51
+
+    parameters = [
+                    Parameter("unknown1", 1, 1),
+                    Parameter("unknown2", 1, 0),
+                    Parameter("unknown3", 1, 0),
+                    Parameter("unknown4", 1, 0),
+                    Parameter("unknown5", 1, 0)
+                 ]
+
+def parseCommand(data) -> Optional[CommandBase]:
+    commands = {
+        0x1: HelloRequest,
+        0x2: HelloResponse,
+        0x3: InitialDataRequest,
+        0x4: InitialDataResponse,
+        0x5: SetTimeRequest,
+        0x6: SetTimeResponse,
+        0x30: SetConfigDataRequest,
+        0x31: SetConfigDataResponse,
+        0x32: SetStandardRequest,
+        0x33: SetStandardResponse,
+        0x34: GetLiveUpdateRequest,
+        0x35: LiveUpdateResponse,
+        0x44: GetBatteryStateRequest,
+        0x45: GetBatteryStateResponse,
+        0x46: GetConfigDataRequest,
+        0x47: GetConfigDataResponse,
+        0x50: SetExtConfigDataRequest,
+        0x51: SetExtConfigDataResponse,
+        0xff: ErrorResponse,
     }
 
     if data[2] not in commands:
